@@ -1,18 +1,24 @@
 stages:
-  - validate
+  # To check if $GITHUB_OAUTH_TOKEN is able to publish a GitHub release,
+  # trigger a custom TravisCI build for this branch using the custom config:
+  #
+  #   env: VALIDATE_GITHUB_OAUTH_TOKEN=yes
+  #
+  - name: validate_github_oauth_token
+    if: env(VALIDATE_GITHUB_OAUTH_TOKEN) = yes
+  - check
+  - test
   - name: deploy
     if: tag IS present
 
 jobs:
   include:
-  - stage: validate
-    name: validate GitHub OAuth token has sufficient scope to release
+  - stage: test
     script:
-    - echo "===== OAuth token validation"
-    - OWNER="$(echo $TRAVIS_REPO_SLUG | cut -d/ -f1)"
-    - echo $TRAVIS_SECURE_ENV_VARS
-    - 'curl -H "Authorization: token ${GITHUB_OAUTH_TOKEN}" "https://api.github.com/users/$OWNER"
-      -I | grep ^X-OAuth-Scopes | egrep -w "repo|public_repo" '
+    - 'echo "===== job script: OK"'
+  - stage: check
+    script:
+    - 'echo "===== job script: OK"'
   - stage: deploy
     script:
     - 'echo "===== job script: OK"'
@@ -28,3 +34,11 @@ jobs:
       on:
         tags: true
         condition: "($SKIP_FORGE_PUBLISH != true)"
+  - stage: validate_github_oauth_token
+    name: validate GitHub OAuth token in TravisCI has sufficient scope to release
+    script:
+    - 'printf "\n===== GITHUB_OAUTH_TOKEN validation \
+               \n(TRAVIS_SECURE_ENV_VARS=${TRAVIS_SECURE_ENV_VARS})\n\n";
+      OWNER="$(echo $TRAVIS_REPO_SLUG | cut -d/ -f1)";
+      curl -H "Authorization: token ${GITHUB_OAUTH_TOKEN}" "https://api.github.com/users/$OWNER"
+      -I | grep ^X-OAuth-Scopes | egrep -w "repo|public_repo" '
