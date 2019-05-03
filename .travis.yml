@@ -1,19 +1,21 @@
 stages:
   # To check if $GITHUB_OAUTH_TOKEN is able to publish a GitHub release,
-  # trigger a custom TravisCI build for this branch using the custom config:
+  # trigger a custom TravisCI build for this branch using the CUSTOM CONFIG:
   #
-  #   env: VALIDATE_GITHUB_OAUTH_TOKEN=yes
+  #   env: VALIDATE_TRAVIS=yes
   #
-  - name: validate_github_oauth_token
-    if: env(VALIDATE_GITHUB_OAUTH_TOKEN) = yes
-  - check
-  - test
+  - name: validate_travis
+    if: 'env(VALIDATE_TRAVIS) = yes'
+  - name: check
+    if: 'NOT env(VALIDATE_TRAVIS) = yes'
+  - name: spec
+    if: 'NOT env(VALIDATE_TRAVIS) = yes'
   - name: deploy
-    if: tag IS present
+    if: 'tag IS present AND NOT env(VALIDATE_TRAVIS) = yes'
 
 jobs:
   include:
-  - stage: test
+  - stage: spec
     script:
     - 'echo "===== job script: OK"'
   - stage: check
@@ -34,7 +36,7 @@ jobs:
       on:
         tags: true
         condition: "($SKIP_FORGE_PUBLISH != true)"
-  - stage: validate_github_oauth_token
+  - stage: validate_travis
     name: validate GitHub OAuth token in TravisCI has sufficient scope to release
     script:
     - 'printf "\n===== GITHUB_OAUTH_TOKEN validation \
