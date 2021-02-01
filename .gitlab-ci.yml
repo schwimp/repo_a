@@ -1,4 +1,4 @@
-# Testing GitHub CI integration
+# Testing GitHub CI integration #2
 
 always-run:
   script: echo 'this should always run'
