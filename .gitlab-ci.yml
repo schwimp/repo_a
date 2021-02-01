@@ -1,0 +1,18 @@
+always-run:
+  script: echo 'this should always run'
+
+on-pull-requests:
+  script: echo 'this should run on pull requests'
+  only:
+    - external_pull_requests
+    
+on-pushes:
+  script: echo 'this should run on pushes'
+  only:
+    - pushes
+
+except-pull-requests:
+  script: echo 'this should not run on pull requests'
+  except:
+    - external_pull_requests
+
